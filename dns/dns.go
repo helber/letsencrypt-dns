@@ -3,8 +3,14 @@ package dns
 import (
 	"fmt"
 	"net"
+	"sync"
 	"time"
 )
+
+type urnCheck struct {
+	urn  string
+	done bool
+}
 
 // CheckTxt execute query on txt
 func CheckTxt(urn string) ([]string, error) {
@@ -19,20 +25,34 @@ func CheckTxt(urn string) ([]string, error) {
 	return resp, nil
 }
 
-// WaitForPublication
-func WaitForPublication(urn string, result chan<- string) {
-	for i := 0; i <= 10; i++ {
-		response, err := CheckTxt(urn)
-		if err != nil {
-			fmt.Println("query error", err)
-		} else {
-			fmt.Println(response)
-			if response[0] != "" {
-				result <- response[0]
+// WaitForPublication call a list of urns and
+func WaitForPublication(urns []string, timeout time.Duration, result chan<- string) {
+	var wg sync.WaitGroup
+	for _, dom := range urns {
+		wg.Add(1)
+		go func(url urnCheck, timeout time.Duration) {
+			start := time.Now()
+			end := start.Add(timeout)
+			for end.After(time.Now()) {
+				if url.done == false {
+					response, err := CheckTxt(url.urn)
+					if err != nil {
+						fmt.Println("query error", err)
+					} else {
+						fmt.Println(response)
+						url.done = true
+						wg.Done()
+					}
+				} else {
+					fmt.Println("Checked", url.urn)
+				}
+				time.Sleep(time.Second * 5)
 			}
-		}
-		time.Sleep(time.Second * 1)
+			fmt.Println("Timeout...", url.urn)
+			wg.Done()
+		}(urnCheck{dom, false}, timeout)
 	}
+	wg.Wait()
 	result <- ""
 
 }

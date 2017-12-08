@@ -1,15 +1,25 @@
 package main
 
 import (
+	"flag"
 	"fmt"
 	"os"
+	"strings"
+	"time"
 
 	"github.com/helber/letsencrypt-dns/dns"
+	"github.com/helber/letsencrypt-dns/letsencrypt"
 	"github.com/helber/letsencrypt-dns/linode"
 )
 
 func main() {
 	linode.APIToken = os.Getenv("LINODE_API_KEY")
+	domains := flag.String("d", "", "Domains sepered by \",\"")
+	flag.Parse()
+	domainlist := strings.Split(*domains, ",")
+	fmt.Println("Generating cert for:", domainlist, "domains")
+	letsencrypt.Call(domainlist)
+
 	// resolv, err := dns.CheckTxt("_acme-challenge.ah-notifications-ahgora.ahgoracloud.com.br")
 	// if err != nil {
 	// 	fmt.Println("got error", err)
@@ -21,13 +31,13 @@ func main() {
 	// if err != nil {
 	// 	fmt.Println("Errro", err)
 	// }
+
 	notify := make(chan string, 2)
-	notify1 := make(chan string, 2)
-	// _acme-challenge.sales-analytics
-	go dns.WaitForPublication("_lalal_challenge.ahgoracloud.com.br", notify)
-	go dns.WaitForPublication("_acme-challenge.sales-analytics.ahgoracloud.com.br", notify1)
+	defer close(notify)
+	// // _acme-challenge.sales-analytics
+	testDom := []string{"A_lalal_challenge.ahgoracloud.com.br", "_acme-challenge.sales-analytics.ahgoracloud.com.br", "_acme-challenge-fall.sales-analytics.ahgoracloud.com.br"}
+	go dns.WaitForPublication(testDom, time.Second*30, notify)
+	fmt.Println("Wait for publication")
 	val := <-notify
 	fmt.Println("Got value ", val)
-	val1 := <-notify1
-	fmt.Println("Got value ", val1)
 }
