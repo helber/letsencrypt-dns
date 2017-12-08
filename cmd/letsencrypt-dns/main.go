@@ -36,7 +36,7 @@ func main() {
 	defer close(notify)
 	// // _acme-challenge.sales-analytics
 	testDom := []string{"A_lalal_challenge.ahgoracloud.com.br", "_acme-challenge.sales-analytics.ahgoracloud.com.br", "_acme-challenge-fall.sales-analytics.ahgoracloud.com.br"}
-	go dns.WaitForPublication(testDom, time.Second*30, notify)
+	go dns.WaitForPropagation(testDom, time.Second*30, notify)
 	fmt.Println("Wait for publication")
 	val := <-notify
 	fmt.Println("Got value ", val)
