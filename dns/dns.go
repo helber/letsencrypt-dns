@@ -21,29 +21,27 @@ func CheckTxt(urn string) ([]string, error) {
 }
 
 // WaitForPropagation call a list of urls and check DNS propagation
-func WaitForPropagation(urls []string, timeout time.Duration, result chan<- string) {
+func WaitForPropagation(urls []string, timeout time.Duration, result chan<- bool) {
 	var wg sync.WaitGroup
 	for _, dom := range urls {
 		wg.Add(1)
-		//
 		go func(url string, timeout time.Duration) {
 			start := time.Now()
 			end := start.Add(timeout)
 			for end.After(time.Now()) {
 				response, err := CheckTxt(url)
-				if err != nil {
-					fmt.Println("query error", err)
-				} else {
-					fmt.Println(response)
+				if err == nil {
+					fmt.Println("DNS propagation done", url, response)
 					wg.Done()
+					return
 				}
 				time.Sleep(time.Second * 5)
 			}
 			fmt.Println("Timeout...", url)
 			wg.Done()
+			result <- false
 		}(dom, timeout)
 	}
 	wg.Wait()
-	result <- ""
-
+	result <- true
 }
