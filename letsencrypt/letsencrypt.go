@@ -3,6 +3,7 @@ package letsencrypt
 import (
 	"fmt"
 	"os/exec"
+	"strings"
 )
 
 // certbot certonly --preferred-challenges dns --manual -d ah-notifications-ahgora.ahgoracloud.com.br
@@ -17,4 +18,14 @@ func Call(domains []string) {
 	// 	cmd.Args = append(cmd.Args, domain)
 	// }
 	fmt.Println(cmd.Args)
+}
+
+// CreateCommandForDomains create a certbot command call for a list of domains
+func CreateCommandForDomains(domains []string) string {
+	cmd := "certbot certonly --preferred-challenges dns --manual "
+	for _, dom := range domains {
+		cmd += "-d "
+		cmd += dom + " "
+	}
+	return strings.TrimSpace(cmd)
 }
