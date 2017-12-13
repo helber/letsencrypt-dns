@@ -3,8 +3,10 @@ package linode
 import (
 	"bytes"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"io/ioutil"
+	"log"
 	"net/http"
 )
 
@@ -80,7 +82,8 @@ func GetDomains() ([]Domain, error) {
 }
 
 // AddRecord create new record on linode
-func AddRecord(r Record, d Domain) error {
+func AddRecord(r Record, d Domain) (Record, error) {
+	var jsonObjs Record
 	cli := &http.Client{}
 	data, err := json.Marshal(r)
 	if err != nil {
@@ -92,27 +95,68 @@ func AddRecord(r Record, d Domain) error {
 	req.Header.Add("Authorization", "Bearer "+APIToken)
 	resp, err := cli.Do(req)
 	if err != nil {
+		return r, err
+	}
+	body, _ := ioutil.ReadAll(resp.Body)
+	err = json.Unmarshal(body, &jsonObjs)
+	if err != nil {
+		fmt.Printf("Can't Unmarshal %s", err)
+	}
+	defer resp.Body.Close()
+	return jsonObjs, nil
+}
+
+// RemoveRecord remove record from linode
+func RemoveRecord(r Record, d Domain) error {
+	cli := &http.Client{}
+	data, err := json.Marshal(r)
+	if err != nil {
+		fmt.Printf("Can't Marshal %s", err)
+	}
+	uri := fmt.Sprintf("https://api.linode.com/v4/domains/%d/records/%d/", d.ID, r.ID)
+	req, err := http.NewRequest("DELETE", uri, bytes.NewBuffer(data))
+	req.Header.Set("Content-Type", "application/json")
+	req.Header.Add("Authorization", "Bearer "+APIToken)
+	resp, err := cli.Do(req)
+	if err != nil {
 		return err
 	}
 	defer resp.Body.Close()
 	return nil
 }
 
-// CreateNewTXTRecord create new record
-func CreateNewTXTRecord(domain string, name string, value string) error {
+// GetDomainObject get domain object from domain name
+func GetDomainObject(domain string) (Domain, error) {
 	domains, err := GetDomains()
-	if err == nil {
-		for _, dom := range domains {
-			if dom.Domain == domain {
-				rec := Record{Type: "TXT", Name: name, Target: value, TTLSec: 300}
-				err := AddRecord(rec, dom)
-				if err != nil {
-					return err
-				}
-			}
-		}
-	} else {
-		return err
+	if err != nil {
+		return Domain{}, err
 	}
-	return nil
+	for _, dom := range domains {
+		if dom.Domain == domain {
+			return dom, nil
+		}
+	}
+	return Domain{}, errors.New("Domain not found")
+}
+
+// RemoveRecords Remove a list of Records from domain
+func RemoveRecords(records []Record, domainObj Domain) {
+	for _, rec := range records {
+		err := RemoveRecord(rec, domainObj)
+		if err != nil {
+			log.Println(err)
+		}
+	}
+}
+
+// CreateNewTXTRecord create new record
+func CreateNewTXTRecord(domain string, name string, value string) (Record, error) {
+	domainObj, err := GetDomainObject(domain)
+	rec := Record{Type: "TXT", Name: name, Target: value, TTLSec: 300}
+	rec, err = AddRecord(rec, domainObj)
+	if err != nil {
+		return rec, err
+	}
+
+	return rec, nil
 }

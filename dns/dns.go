@@ -1,7 +1,7 @@
 package dns
 
 import (
-	"fmt"
+	"log"
 	"net"
 	"sync"
 	"time"
@@ -11,10 +11,7 @@ import (
 func CheckTxt(urn string) ([]string, error) {
 	resp, err := net.LookupTXT(urn)
 	if err != nil {
-		err := fmt.Errorf("can't lookup %s error %s", urn, err)
-		if err == nil {
-			fmt.Println("can't print error ", err)
-		}
+		log.Printf("can't lookup %s error %s", urn, err)
 		return resp, err
 	}
 	return resp, nil
@@ -30,14 +27,16 @@ func WaitForPropagation(urls []string, timeout time.Duration, result chan<- bool
 			end := start.Add(timeout)
 			for end.After(time.Now()) {
 				response, err := CheckTxt(url)
+				log.Println("Check ", url)
+				log.Println("Time", end, time.Now())
 				if err == nil {
-					fmt.Println("DNS propagation done", url, response)
+					log.Println("DNS propagation done", url, response)
 					wg.Done()
 					return
 				}
-				time.Sleep(time.Second * 5)
+				time.Sleep(time.Second * 30)
 			}
-			fmt.Println("Timeout...", url)
+			log.Println("Timeout...", url)
 			wg.Done()
 			result <- false
 		}(dom, timeout)
