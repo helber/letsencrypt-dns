@@ -6,8 +6,8 @@ import (
 	"log"
 	"os"
 	"strings"
-	"time"
 
+	"github.com/helber/letsencrypt-dns/letsencrypt"
 	"github.com/helber/letsencrypt-dns/linode"
 )
 
@@ -17,38 +17,23 @@ func main() {
 	mainDomain := flag.String("domain", "", "Main domain")
 	flag.Parse()
 	domainlist := strings.Split(*domains, ",")
+
+	if len(domainlist) == 1 {
+		log.Panic("at last 1 domain is required ", len(domainlist)-1)
+	}
+	if *mainDomain == "" {
+		log.Panic("main domain required")
+	}
 	log.Println("Generating cert on (", *mainDomain, "):", domainlist, "domains")
-	// Comunication Channels
-	// propagation := make(chan bool)
-	// done := make(chan bool)
-	// txtRecords := make(chan letsencrypt.TXTRecord)
-
-	// go dns.WaitForPropagation(txtDomain, 10*time.Minute, propagation)
-	// letsencrypt.Call(*mainDomain, domainlist, txtRecords, propagation, done)
-
-	domainObj, err := linode.GetDomainObject(*mainDomain)
+	// Done Channel
+	done := make(chan bool)
+	err := letsencrypt.Call(*mainDomain, domainlist, done)
 	if err != nil {
-		log.Panic(err)
+		log.Panicf("can't call letsencrypt: %s", err)
 	}
-
-	records := []linode.Record{}
-	for i, kv := range domainlist {
-		value := fmt.Sprintf("__%v_challenge.%v", i, kv)
-		rec, err := linode.CreateNewTXTRecord(*mainDomain, kv, value)
-		records = append(records, rec)
-		if err != nil {
-			log.Fatal("can't create record")
-			os.Exit(1)
-		}
-		log.Println("New record created", rec)
-	}
-	time.Sleep(time.Minute * 3)
-	// Clean
-	for _, record := range records {
-		err := linode.RemoveRecord(record, domainObj)
-		if err != nil {
-			log.Println("error removing", record)
-		}
+	result := <-done
+	if result == true {
+		fmt.Print("Congratulations")
 	}
 
 	// resolv, err := dns.CheckTxt("_acme-challenge.ah-notifications-ahgora.ahgoracloud.com.br")

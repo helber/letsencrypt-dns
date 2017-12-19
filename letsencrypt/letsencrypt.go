@@ -8,6 +8,10 @@ import (
 	"os"
 	"os/exec"
 	"strings"
+	"time"
+
+	"github.com/helber/letsencrypt-dns/dns"
+	"github.com/helber/letsencrypt-dns/linode"
 )
 
 // certbot certonly --preferred-challenges dns --manual -d ah-notifications-ahgora.ahgoracloud.com.br
@@ -20,36 +24,43 @@ type TXTRecord struct {
 }
 
 func parseTopic(topic string) (TXTRecord, error) {
-	var pos int
 	keyName := ""
 	keyValue := ""
-	for _, item := range strings.Split(topic, "\n") {
-		if pos == 3 {
+	for i, item := range strings.Split(topic, "\n") {
+		if i == 3 {
 			keyName = strings.Split(item, " ")[0]
 		}
-		if pos == 5 {
+		if i == 5 {
 			keyValue = strings.Split(item, " ")[0]
 		}
-		pos++
 	}
 	return TXTRecord{keyName, keyValue}, nil
 }
 
 // Call for domains using certbot
-func Call(domain string, domains []string, recordChan chan TXTRecord, propagation chan bool, done chan bool) {
+func Call(domain string, domains []string, done chan bool) error {
+	var generatedDomains []string
+	var recordList []linode.Record
+	domainObj, err := linode.GetDomainObject(domain)
+	if err != nil {
+		return err
+	}
 	cmd := exec.Command("certbot", "certonly", "--preferred-challenges", "dns", "--manual")
 	for _, sub := range domains {
 		cmd.Args = append(cmd.Args, "-d")
 		cmd.Args = append(cmd.Args, sub)
 	}
+	log.Printf("calling %s", cmd.Args)
 	cmd.Stderr = os.Stderr
 	stdin, err := cmd.StdinPipe()
 	if nil != err {
-		log.Fatalf("Error obtaining stdin: %s", err.Error())
+		return err
+		// log.Fatalf("Error obtaining stdin: %s", err.Error())
 	}
 	stdout, err := cmd.StdoutPipe()
 	if nil != err {
-		log.Fatalf("Error obtaining stdout: %s", err.Error())
+		return err
+		// log.Fatalf("Error obtaining stdout: %s", err.Error())
 	}
 	reader := bufio.NewReader(stdout)
 	// Parse stdout
@@ -70,13 +81,23 @@ func Call(domain string, domains []string, recordChan chan TXTRecord, propagatio
 			// Topic
 			if bytes.Contains(newBuf, []byte("Press Enter to Continue")) {
 				parced++
-				dom, err := parseTopic(string(newBuf))
+				toParse := string(newBuf)
+				dom, err := parseTopic(toParse)
 				if err == nil {
-					log.Println(dom)
+					log.Fatalf("Error parsing buffer:%s\n%s", err.Error(), toParse)
 				}
-				recordChan <- TXTRecord{dom.domain, dom.key}
+				generatedDomains = append(generatedDomains, dom.domain)
+				// Register new TXT record
+				rec := linode.Record{Type: "TXT", Name: dom.domain, Target: dom.key, TTLSec: 300}
+				record, err := linode.AddRecord(rec, domainObj)
+				if err != nil {
+					log.Fatalf("can't create new record:%s", err.Error())
+				}
+				recordList = append(recordList, record)
 				if parced >= topics {
-					// wait for propagation
+					propagation := make(chan bool)
+					dns.WaitForPropagation(generatedDomains, 10*time.Minute, propagation)
+					// wait for propagation before press ENTER
 					<-propagation
 				}
 				newBuf = []byte{}
@@ -89,7 +110,15 @@ func Call(domain string, domains []string, recordChan chan TXTRecord, propagatio
 		log.Fatalf("Error starting program: %s, %s", cmd.Path, err.Error())
 	}
 	cmd.Wait()
+	// Clean registered domains
+	for _, record := range recordList {
+		err := linode.RemoveRecord(record, domainObj)
+		if err != nil {
+			log.Println("error removing", record)
+		}
+	}
 	done <- true
+	return nil
 }
 
 // CreateCommandForDomains create a certbot command call for a list of domains
