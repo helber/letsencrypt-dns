@@ -3,7 +3,6 @@ package main
 import (
 	"flag"
 	"fmt"
-	"log"
 	"os"
 	"strings"
 
@@ -19,17 +18,20 @@ func main() {
 	domainlist := strings.Split(*domains, ",")
 
 	if len(domainlist) == 1 {
-		log.Panic("at last 1 domain is required ", len(domainlist)-1)
+		fmt.Printf("at last 1 domain is required %v given", len(domainlist)-1)
+		return
 	}
 	if *mainDomain == "" {
-		log.Panic("main domain required")
+		fmt.Printf("main domain required")
+		return
 	}
-	log.Println("Generating cert on (", *mainDomain, "):", domainlist, "domains")
+	// log.Println("Generating cert on (", *mainDomain, "):", domainlist, "domains")
 	// Done Channel
 	done := make(chan bool)
 	err := letsencrypt.Call(*mainDomain, domainlist, done)
 	if err != nil {
-		log.Panicf("can't call letsencrypt: %s", err)
+		fmt.Printf("can't call letsencrypt: %s", err)
+		return
 	}
 	result := <-done
 	if result == true {

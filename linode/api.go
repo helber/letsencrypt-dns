@@ -70,13 +70,19 @@ func GetDomains() ([]Domain, error) {
 	resp, err := cli.Do(req)
 	if err != nil {
 		fmt.Println("Error loading API", err)
-	} else {
-		defer resp.Body.Close()
-		body, _ := ioutil.ReadAll(resp.Body)
-		err := json.Unmarshal(body, &jsonObjs)
-		if err != nil {
-			fmt.Printf("Can't Unmarshal %s", err)
-		}
+		return []Domain{}, err
+	}
+	defer resp.Body.Close()
+	if resp.StatusCode >= 500 {
+		return []Domain{}, errors.New("linode api server error")
+	}
+	if resp.StatusCode >= 400 {
+		return []Domain{}, errors.New("linode api unathorized")
+	}
+	body, _ := ioutil.ReadAll(resp.Body)
+	err = json.Unmarshal(body, &jsonObjs)
+	if err != nil {
+		fmt.Printf("Can't Unmarshal %s", err)
 	}
 	return jsonObjs.Data, err
 }
