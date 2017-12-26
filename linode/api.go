@@ -87,6 +87,33 @@ func GetDomains() ([]Domain, error) {
 	return jsonObjs.Data, err
 }
 
+// GetRecords Get all Records from Domain
+func GetRecords(domain Domain) ([]Record, error) {
+	var jsonObjs RecordResult
+	cli := &http.Client{}
+	uri := fmt.Sprintf("https://api.linode.com/v4/domains/%d/records/", domain.ID)
+	req, err := http.NewRequest("GET", uri, nil)
+	req.Header.Add("Authorization", "Bearer "+APIToken)
+	resp, err := cli.Do(req)
+	if err != nil {
+		fmt.Println("Error loading API", err)
+		return []Record{}, err
+	}
+	defer resp.Body.Close()
+	if resp.StatusCode >= 500 {
+		return []Record{}, errors.New("linode api server error")
+	}
+	if resp.StatusCode >= 400 {
+		return []Record{}, errors.New("linode api unathorized")
+	}
+	body, _ := ioutil.ReadAll(resp.Body)
+	err = json.Unmarshal(body, &jsonObjs)
+	if err != nil {
+		fmt.Printf("Can't Unmarshal %s", err)
+	}
+	return jsonObjs.Data, err
+}
+
 // AddRecord create new record on linode
 func AddRecord(r Record, d Domain) (Record, error) {
 	var jsonObjs Record
@@ -155,9 +182,30 @@ func RemoveRecords(records []Record, domainObj Domain) {
 	}
 }
 
+// RemoveRecordByName Remove a txt record from linode
+func RemoveRecordByName(record string, domain string) error {
+	domainObj, err := GetDomainObject(domain)
+	if err != nil {
+		return err
+	}
+	recordsObj, err := GetRecords(domainObj)
+	if err != nil {
+		return err
+	}
+	for _, r := range recordsObj {
+		if r.Name == record {
+			return RemoveRecord(r, domainObj)
+		}
+	}
+	return errors.New("record not found")
+}
+
 // CreateNewTXTRecord create new record
 func CreateNewTXTRecord(domain string, name string, value string) (Record, error) {
 	domainObj, err := GetDomainObject(domain)
+	if err != nil {
+		return Record{}, err
+	}
 	rec := Record{Type: "TXT", Name: name, Target: value, TTLSec: 300}
 	rec, err = AddRecord(rec, domainObj)
 	if err != nil {

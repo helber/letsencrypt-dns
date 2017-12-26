@@ -25,10 +25,9 @@ func main() {
 		fmt.Printf("main domain required")
 		return
 	}
-	// log.Println("Generating cert on (", *mainDomain, "):", domainlist, "domains")
 	// Done Channel
 	done := make(chan bool)
-	err := letsencrypt.Call(*mainDomain, domainlist, done)
+	err := letsencrypt.CallAuto(domainlist, done)
 	if err != nil {
 		fmt.Printf("can't call letsencrypt: %s", err)
 		return
@@ -37,39 +36,4 @@ func main() {
 	if result == true {
 		fmt.Print("Congratulations")
 	}
-
-	// resolv, err := dns.CheckTxt("_acme-challenge.ah-notifications-ahgora.ahgoracloud.com.br")
-	// if err != nil {
-	// 	fmt.Println("got error", err)
-	// } else {
-	// 	fmt.Printf("\nresolv response:%s\n\n", resolv)
-	// }
-
-	// err := linode.CreateNewTXTRecord("ahgoracloud.com.br", "_lalal_challenge.ahgoracloud.com.br", "My Name is Helber Maciel Guerra")
-	// if err != nil {
-	// 	fmt.Println("Errro", err)
-	// }
-	// sldk := []DomainKv{
-	// 	{"_acme-challenge.ahgoracloud.com.br", "OP3xHdUaRtLB6ou3UQ878UfuZ0zo_i0wAW7sWdSNqSw"},
-	// 	{"_acme-challenge.console.ahgoracloud.com.br", "k-wVRRiv5aBt7RhSFsmq2N6Qa-qU5Ykj5LoIsrk2rM4"},
-	// 	{"_acme-challenge.metrics.ahgoracloud.com.br", "IHsh4SiyYrsQF0mh__Lg2hGA0rlot02VguROLn07plM"},
-	// 	{"_acme-challenge.logs.ahgoracloud.com.br", "Z-Vn6VfLAHIlZBqmP92SOjY6afB1Lu5yM5110qwEeAE"},
-	// 	{"_acme-challenge.node.ahgoracloud.com.br", "VurKbQclijCZwGJl9sXDlrx4LABr2gU2BL_OiPmaUzw"},
-	// }
-
-	// preDomains := []string{
-	// 	"_acme-challenge.ahgoracloud.com.br",
-	// 	"_acme-challenge.console.ahgoracloud.com.br",
-	// 	"_acme-challenge.metrics.ahgoracloud.com.br",
-	// 	"_acme-challenge.logs.ahgoracloud.com.br",
-	// 	"_acme-challenge.node.ahgoracloud.com.br",
-	// }
-
-	// notify := make(chan bool)
-	// defer close(notify)
-	// go dns.WaitForPropagation(preDomains, time.Minute*10, notify)
-	// fmt.Println("Wait for publication")
-	// val := <-notify
-	// fmt.Println("Got value ", val)
-
 }
