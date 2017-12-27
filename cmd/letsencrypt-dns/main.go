@@ -27,6 +27,7 @@ func main() {
 	}
 	// Done Channel
 	done := make(chan bool)
+	defer close(done)
 	err := letsencrypt.CallAuto(domainlist, done)
 	if err != nil {
 		fmt.Printf("can't call letsencrypt: %s", err)

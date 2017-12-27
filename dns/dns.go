@@ -38,7 +38,7 @@ func WaitForPropagation(urls []string, timeout time.Duration, result chan<- bool
 					wg.Done()
 					return
 				}
-				time.Sleep(time.Second * 15)
+				time.Sleep(time.Second * 30)
 			}
 			log.Println("Timeout...", url)
 			wg.Done()

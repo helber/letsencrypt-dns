@@ -51,6 +51,7 @@ func CallAuto(domains []string, done chan bool) error {
 	cmd := exec.Command(
 		"certbot",
 		"certonly",
+		"--test-cert",
 		"--agree-tos",
 		"--manual-public-ip-logging-ok",
 		"-m",
@@ -68,12 +69,16 @@ func CallAuto(domains []string, done chan bool) error {
 		cmd.Args = append(cmd.Args, sub)
 	}
 	log.Println(cmd.Args)
-	// Wait
 	if err := cmd.Start(); nil != err {
 		log.Fatalf("Error starting program: %s, %s", cmd.Path, err.Error())
 	}
 	log.Println("wait for command done")
-	cmd.Wait()
+	// Wait
+	err := cmd.Wait()
+	if err != nil {
+		done <- false
+		return err
+	}
 	done <- true
 	log.Println("command done")
 	return nil
