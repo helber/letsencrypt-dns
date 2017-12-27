@@ -33,3 +33,7 @@
 # End of https://www.gitignore.io/api/visualstudiocode
 _ignore*
 debug
+
+cmd/letsencrypt-cleanup/letsencrypt-cleanup
+cmd/letsencrypt-dns/letsencrypt-dns
+cmd/letsencrypt-validate/letsencrypt-validate
