@@ -75,12 +75,15 @@ func CallAuto(domains []string, done chan bool) error {
 	log.Println("wait for command done")
 	// Wait
 	err := cmd.Wait()
+	log.Println("command done")
 	if err != nil {
+		log.Printf("error=%v", err)
 		done <- false
 		return err
 	}
+	log.Println("send true to channel")
 	done <- true
-	log.Println("command done")
+	log.Println("channel done")
 	return nil
 }
 

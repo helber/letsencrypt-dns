@@ -10,7 +10,7 @@ func Example_no_domain() {
 	os.Args = []string{"", "-d", "lala,lele,lili,lolo,lulu"}
 	main()
 	// Output:
-	// main domain required
+	// invalid domain
 }
 
 func Example_no_domains() {
@@ -19,14 +19,14 @@ func Example_no_domains() {
 	os.Args = []string{""}
 	main()
 	// Output:
-	// at last 1 domain is required 0 given
+	// invalid domain
 }
 
 func Example_invalid_token() {
 	oldArgs := os.Args
 	defer func() { os.Args = oldArgs }()
-	os.Args = []string{"", "-domain", "ahgora.com.br", "-d", "a1.ahgora.com.br,a2.ahgora.com.br"}
+	os.Args = []string{"", "-d", "a1.example.com.br,a2.example.com"}
 	main()
 	// Output:
-	// can't call letsencrypt: linode api unathorized
+	// multiple registers must be a same domain example.com.br <> example.com
 }
