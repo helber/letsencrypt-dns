@@ -51,7 +51,6 @@ func CallAuto(domains []string, done chan bool) error {
 	cmd := exec.Command(
 		"certbot",
 		"certonly",
-		"--test-cert",
 		"--agree-tos",
 		"--manual-public-ip-logging-ok",
 		"-m",
