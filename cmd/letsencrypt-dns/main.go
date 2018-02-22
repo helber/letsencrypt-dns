@@ -39,7 +39,6 @@ func main() {
 
 	cmds := letsencrypt.CreateCommandForDomains(domainlist)
 	log.Printf("cmd=%s", cmds)
-	return
 	// Done Channel
 	done := make(chan bool, 1)
 	defer close(done)

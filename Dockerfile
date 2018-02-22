@@ -1,4 +1,4 @@
-FROM golang:1.9.2
+FROM golang:1.10
 WORKDIR /go/src/github.com/helber/letsencrypt-dns
 COPY . .
 RUN go get -d -v github.com/helber/letsencrypt-dns/...
