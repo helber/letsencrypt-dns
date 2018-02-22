@@ -1,6 +1,7 @@
 package main
 
 import (
+	"flag"
 	"fmt"
 	"log"
 	"os"
@@ -8,12 +9,15 @@ import (
 
 	"github.com/helber/letsencrypt-dns/dns"
 	"github.com/helber/letsencrypt-dns/linode"
+	mylog "github.com/helber/letsencrypt-dns/log"
 )
 
 func main() {
 	linode.APIToken = os.Getenv("LINODE_API_KEY")
 	certbotDomain := os.Getenv("CERTBOT_DOMAIN")
 	certbotChalenge := os.Getenv("CERTBOT_VALIDATION")
+	flag.Parse()
+	mylog.InitLogs()
 
 	if certbotDomain == "" {
 		log.Fatal("domain env (CERTBOT_DOMAIN) var not found")

@@ -46,6 +46,7 @@ func parseTopic(topic string) (TXTRecord, error) {
 	return TXTRecord{keyName, keyValue}, nil
 }
 
+// CallAuto
 func CallAuto(domains []string, done chan bool) error {
 	// certbot certonly --manual-public-ip-logging-ok --agree-tos -n -m sre@ahgora.com.br --preferred-challenges=dns --test-cert  --manual --manual-auth-hook /opt/certbot/validation.sh --manual-cleanup-hook /opt/certbot/clean.sh -d t1.ahgoracloud.com.br -d t2.ahgoracloud.com.br
 	cmd := exec.Command(
@@ -68,12 +69,33 @@ func CallAuto(domains []string, done chan bool) error {
 		cmd.Args = append(cmd.Args, sub)
 	}
 	log.Println(cmd.Args)
+	// Read output
+	cmd.Stderr = os.Stderr
+	stdin, err := cmd.StdinPipe()
+	if nil != err {
+		return err
+	}
+	stdout, err := cmd.StdoutPipe()
+	if nil != err {
+		return err
+	}
+	reader := bufio.NewReader(stdout)
+	// Parse stdout
+	go func(reader io.Reader) {
+		defer stdin.Close()
+		scanner := bufio.NewScanner(reader)
+		for scanner.Scan() {
+			txt := scanner.Text()
+			log.Println("-->", txt)
+		}
+	}(reader)
+
 	if err := cmd.Start(); nil != err {
 		log.Fatalf("Error starting program: %s, %s", cmd.Path, err.Error())
 	}
 	log.Println("wait for command done")
 	// Wait
-	err := cmd.Wait()
+	err = cmd.Wait()
 	log.Println("command done")
 	if err != nil {
 		log.Printf("error=%v", err)
@@ -185,6 +207,7 @@ func Call(domain string, domains []string, done chan bool) error {
 // CreateCommandForDomains create a certbot command call for a list of domains
 func CreateCommandForDomains(domains []string) string {
 	cmd := "certbot certonly --preferred-challenges dns --manual "
+	log.Printf("CMD=%s", cmd)
 	for _, dom := range domains {
 		cmd += "-d "
 		cmd += dom + " "
