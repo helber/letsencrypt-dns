@@ -26,5 +26,7 @@ RUN tar -zxf openshift-origin-client-tools-v3.7.0-7ed6862-linux-64bit.tar.gz && 
 COPY --from=0 /usr/local/bin/letsencrypt-dns /usr/local/bin/letsencrypt-dns
 COPY --from=0 /usr/local/bin/letsencrypt-validate /usr/local/bin/letsencrypt-validate
 COPY --from=0 /usr/local/bin/letsencrypt-cleanup /usr/local/bin/letsencrypt-cleanup
+# Log directory inside container
+RUN mkdir -p /var/log/letsencrypt-dns/
 
 ENTRYPOINT [ "bash" ]
