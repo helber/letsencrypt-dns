@@ -17,11 +17,11 @@ RUN apk --no-cache add ca-certificates wget && \
 
 RUN apk  add --no-cache --virtual .certbot-deps \
         bash
-RUN wget https://github.com/openshift/origin/releases/download/v3.7.0/openshift-origin-client-tools-v3.7.0-7ed6862-linux-64bit.tar.gz
-RUN tar -zxf openshift-origin-client-tools-v3.7.0-7ed6862-linux-64bit.tar.gz && \
-    mv openshift-origin-client-tools-v3.7.0-7ed6862-linux-64bit/oc /usr/local/bin/oc && \
-    chmod +x /usr/local/bin/oc && \
-    rm -Rf openshift-origin-client-tools-v3.7.0-7ed6862-linux-64bit*
+# RUN wget https://github.com/openshift/origin/releases/download/v3.7.1/openshift-origin-client-tools-v3.7.1-ab0f056-linux-64bit.tar.gz
+# RUN tar -zxf openshift-origin-client-tools-v3.7.1-ab0f056-linux-64bit.tar.gz && \
+#     mv openshift-origin-client-tools-v3.7.1-ab0f056-linux-64bit/oc /usr/local/bin/oc && \
+#     chmod +x /usr/local/bin/oc && \
+#     rm -Rf openshift-origin-client-tools-v3.7.1-ab0f056-linux-64bit*
 
 COPY --from=0 /usr/local/bin/letsencrypt-dns /usr/local/bin/letsencrypt-dns
 COPY --from=0 /usr/local/bin/letsencrypt-validate /usr/local/bin/letsencrypt-validate
