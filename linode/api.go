@@ -199,7 +199,7 @@ func RemoveRecordByName(record string, domain string) error {
 	}
 	records := result.Data
 	log.Printf("records page=%d len=%v cap=%v\n", 1, len(records), cap(records))
-	for page := 1; page <= result.Page; {
+	for page := 1; page < result.Page; {
 		page = result.Page + 1
 		result, err := GetRecordResults(domainObj, page)
 		if err != nil {
@@ -211,7 +211,7 @@ func RemoveRecordByName(record string, domain string) error {
 		log.Printf("records page=%d len=%v cap=%v\n", page, len(records), cap(records))
 	}
 	for _, r := range records {
-		if r.Name == record {
+		if r.Name == record && r.Type == "TXT" {
 			log.Println("Record Found", r)
 			return RemoveRecord(r, domainObj)
 		}
