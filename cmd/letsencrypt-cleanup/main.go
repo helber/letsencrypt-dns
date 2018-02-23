@@ -2,7 +2,6 @@ package main
 
 import (
 	"flag"
-	"fmt"
 	"log"
 	"os"
 	"strings"
@@ -18,6 +17,7 @@ func main() {
 	certbotChalenge := os.Getenv("CERTBOT_VALIDATION")
 	flag.Parse()
 	mylog.InitLogs()
+	log.Printf("domain=[%s] chalenge=[%s]\n", certbotDomain, certbotChalenge)
 
 	if certbotDomain == "" {
 		log.Fatal("domain env (CERTBOT_DOMAIN) var not found")
@@ -26,8 +26,8 @@ func main() {
 		log.Fatal("validator env (CERTBOT_VALIDATION) var not found")
 	}
 	mainDomain := dns.GetMainDomain(certbotDomain)
-	record := fmt.Sprintf("_acme-challenge.%s", certbotDomain)
-	sub := strings.TrimSuffix(record, "."+mainDomain)
+	log.Printf("main domain=%s\n", mainDomain)
+	sub := strings.TrimSuffix(certbotDomain, "."+mainDomain)
 	err := linode.RemoveRecordByName(sub, mainDomain)
 	if err != nil {
 		log.Fatal(err)

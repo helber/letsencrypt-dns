@@ -95,7 +95,7 @@ func TestUnmarshal(t *testing.T) {
 	rec := Record{Type: "TXT", Name: "_acme-challenge.xpto.ahgoracloud.com.br", Target: "xpto"}
 	out, err := json.Marshal(rec)
 	if err != nil {
-		t.Fatalf("can't Marshal %s(%s)", rec, err)
+		t.Fatalf("can't Marshal %v(%s)", rec, err)
 	}
 	t.Logf("OUT=%s", out)
 
