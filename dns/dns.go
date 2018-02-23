@@ -26,6 +26,7 @@ func CheckTxt(urn string) ([]string, error) {
 // WaitForPropagation call a list of urls and check DNS propagation
 func WaitForPropagation(urls []string, timeout time.Duration, result chan<- bool) {
 	var wg sync.WaitGroup
+	sucess := 0
 	for _, dom := range urls {
 		wg.Add(1)
 		go func(url string, timeout time.Duration) {
@@ -34,9 +35,14 @@ func WaitForPropagation(urls []string, timeout time.Duration, result chan<- bool
 			for end.After(time.Now()) {
 				response, err := CheckTxt(url)
 				if err == nil {
-					log.Println("DNS propagation done", url, response)
-					wg.Done()
-					return
+					if sucess > 2 {
+						log.Println("DNS propagation done", url, response)
+						wg.Done()
+						return
+					}
+					sucess++
+				} else {
+					sucess = 0
 				}
 				time.Sleep(time.Second * 30)
 			}
