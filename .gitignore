@@ -38,3 +38,4 @@ cmd/letsencrypt-cleanup/letsencrypt-cleanup
 cmd/letsencrypt-dns/letsencrypt-dns
 cmd/letsencrypt-validate/letsencrypt-validate
 certs/
+logs/

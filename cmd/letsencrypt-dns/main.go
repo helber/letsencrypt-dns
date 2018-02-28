@@ -3,17 +3,14 @@ package main
 import (
 	"flag"
 	"log"
-	"os"
 	"strings"
 
 	"github.com/bobesa/go-domain-util/domainutil"
 	"github.com/helber/letsencrypt-dns/letsencrypt"
-	"github.com/helber/letsencrypt-dns/linode"
 	mylog "github.com/helber/letsencrypt-dns/log"
 )
 
 func main() {
-	linode.APIToken = os.Getenv("LINODE_API_KEY")
 	domains := flag.String("d", "", "Domains sepered by \",\"")
 	flag.Parse()
 	mylog.InitLogs()
@@ -37,8 +34,6 @@ func main() {
 		return
 	}
 
-	cmds := letsencrypt.CreateCommandForDomains(domainlist)
-	log.Printf("cmd=%s", cmds)
 	// Done Channel
 	done := make(chan bool, 1)
 	defer close(done)

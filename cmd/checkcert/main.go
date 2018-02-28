@@ -3,32 +3,23 @@ package main
 import (
 	"flag"
 	"log"
+	"strings"
 
 	"github.com/helber/letsencrypt-dns/checkcert"
 	mylog "github.com/helber/letsencrypt-dns/log"
 )
 
 func main() {
+	domains := flag.String("d", "", "Domain host and port (host:port) sepered by \",\"\nEx.: www.google.com.br:443,example.com:443,manage.openshift.com:443")
 	flag.Parse()
 	mylog.InitLogs()
-	// res, err := checkcert.CheckHost("pw2-socket.ahgoracloud.com.br:443")
-	// if err != nil {
-	// 	log.Printf("error %v", err)
-	// }
-	// log.Println(res)
-	// res, err = checkcert.CheckHost("ahgoracloud.com.br:443")
-	// if err != nil {
-	// 	log.Printf("error %v", err)
-	// }
-	// log.Println(res)
-	// res, err = checkcert.CheckHost("console.ahgoracloud.com.br:443")
-	// if err != nil {
-	// 	log.Printf("error %v", err)
-	// }
-	// log.Println(res)
-	res, err := checkcert.CheckHost("www.ahgora.com.br:443")
-	if err != nil {
-		log.Printf("error %v", err)
+	domainlist := strings.Split(*domains, ",")
+
+	for _, dom := range domainlist {
+		res, err := checkcert.CheckHost(dom)
+		if err != nil {
+			log.Printf("error %v", err)
+		}
+		log.Printf("DOMAIN=%s days=%d", res.Host, res.ExpireDays)
 	}
-	log.Println(res)
 }

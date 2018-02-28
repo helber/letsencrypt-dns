@@ -7,6 +7,7 @@ import (
 	"os"
 	"time"
 
+	cloudflare "github.com/cloudflare/cloudflare-go"
 	"github.com/helber/letsencrypt-dns/dns"
 	"github.com/helber/letsencrypt-dns/linode"
 	mylog "github.com/helber/letsencrypt-dns/log"
@@ -27,13 +28,32 @@ func main() {
 	}
 	mainDomain := dns.GetMainDomain(certbotDomain)
 	record := fmt.Sprintf("_acme-challenge.%s", certbotDomain)
-
-	recObj, err := linode.CreateNewTXTRecord(mainDomain, record, certbotChalenge)
+	provider, err := dns.GetNsProvider(mainDomain)
 	if err != nil {
-		log.Fatalln("erro", err)
+		log.Fatal("can't get provider", err)
 	}
-	log.Printf("Record created ID=%d Obj=%v", recObj.ID, recObj)
 
+	if provider == "linode.com" {
+		recObj, err := linode.CreateNewTXTRecord(mainDomain, record, certbotChalenge)
+		if err != nil {
+			log.Fatalln("erro", err)
+		}
+		log.Printf("Record created ID=%d Obj=%v", recObj.ID, recObj)
+	} else {
+		api, err := cloudflare.New(os.Getenv("CF_API_KEY"), os.Getenv("CF_API_EMAIL"))
+		if err != nil {
+			log.Fatal(err)
+		}
+		id, err := api.ZoneIDByName(mainDomain)
+		if err != nil {
+			log.Fatal(err)
+		}
+		record, err := api.CreateDNSRecord(id, cloudflare.DNSRecord{Type: "TXT", Name: record, Content: certbotChalenge, TTL: 300})
+		if err != nil {
+			log.Fatal(err)
+		}
+		log.Println("New record", record)
+	}
 	notify := make(chan bool)
 	defer close(notify)
 	go dns.WaitForPropagation([]string{record}, time.Minute*60, notify)
