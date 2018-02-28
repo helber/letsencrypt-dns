@@ -48,12 +48,18 @@ func main() {
 			log.Fatal(err)
 		}
 		// Fetch records
-		records, err := api.DNSRecords(id, cloudflare.DNSRecord{Type: "TXT", Name: certbotDomain})
+		recordName := "_acme-challenge." + certbotDomain
+		filter := cloudflare.DNSRecord{Type: "TXT", Name: recordName, Content: certbotChalenge}
+		records, err := api.DNSRecords(id, filter)
 		if err != nil {
 			log.Fatal(err)
 		}
+		if len(records) == 0 {
+			log.Fatalf("record not found filter={Type: \"%v\", Name: \"%v\", Content: \"%v\"}\n", filter.Type, filter.Name, filter.Content)
+			os.Exit(1)
+		}
 		for _, rec := range records {
-			log.Println("REMOVING DNS RECORD", rec)
+			log.Println("removing DNS record", rec)
 			err := api.DeleteDNSRecord(id, rec.ID)
 			if err != nil {
 				log.Fatal("can't delete record", err)
