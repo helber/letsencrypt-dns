@@ -37,5 +37,6 @@ debug
 cmd/letsencrypt-cleanup/letsencrypt-cleanup
 cmd/letsencrypt-dns/letsencrypt-dns
 cmd/letsencrypt-validate/letsencrypt-validate
+cmd/checkcert/checkcert
 certs/
 logs/
