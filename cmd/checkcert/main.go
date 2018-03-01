@@ -2,6 +2,7 @@ package main
 
 import (
 	"flag"
+	"fmt"
 	"log"
 	"strings"
 
@@ -20,6 +21,7 @@ func main() {
 		if err != nil {
 			log.Printf("error %v", err)
 		}
-		log.Printf("DOMAIN=%s days=%d", res.Host, res.ExpireDays)
+		// log.Printf("DOMAIN=%s days=%d", res.Host, res.ExpireDays)
+		fmt.Println(res.ExpireDays)
 	}
 }
