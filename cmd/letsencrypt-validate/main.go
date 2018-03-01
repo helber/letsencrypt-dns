@@ -14,7 +14,6 @@ import (
 )
 
 func main() {
-	linode.APIToken = os.Getenv("LINODE_API_KEY")
 	certbotDomain := os.Getenv("CERTBOT_DOMAIN")
 	certbotChalenge := os.Getenv("CERTBOT_VALIDATION")
 	flag.Parse()
@@ -34,6 +33,7 @@ func main() {
 	}
 
 	if provider == "linode.com" {
+		linode.APIToken = os.Getenv("LINODE_API_KEY")
 		recObj, err := linode.CreateNewTXTRecord(mainDomain, record, certbotChalenge)
 		if err != nil {
 			log.Fatalln("erro", err)
