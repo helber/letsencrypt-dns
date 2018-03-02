@@ -1,10 +1,11 @@
 package main
 
 import (
-	"flag"
 	"log"
 	"os"
 	"strings"
+
+	flag "github.com/spf13/pflag"
 
 	cloudflare "github.com/cloudflare/cloudflare-go"
 	"github.com/helber/letsencrypt-dns/dns"

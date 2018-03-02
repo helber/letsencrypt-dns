@@ -1,11 +1,12 @@
 package main
 
 import (
-	"flag"
 	"fmt"
 	"log"
 	"os"
 	"time"
+
+	flag "github.com/spf13/pflag"
 
 	cloudflare "github.com/cloudflare/cloudflare-go"
 	"github.com/helber/letsencrypt-dns/dns"

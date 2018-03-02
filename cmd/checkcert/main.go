@@ -1,13 +1,13 @@
 package main
 
 import (
-	"flag"
 	"fmt"
 	"log"
 	"strings"
 
 	"github.com/helber/letsencrypt-dns/checkcert"
 	mylog "github.com/helber/letsencrypt-dns/log"
+	flag "github.com/spf13/pflag"
 )
 
 func main() {
@@ -21,7 +21,7 @@ func main() {
 		if err != nil {
 			log.Printf("error %v", err)
 		}
-		// log.Printf("DOMAIN=%s days=%d", res.Host, res.ExpireDays)
+		log.Printf("DOMAIN=%s days=%d", res.Host, res.ExpireDays)
 		fmt.Println(res.ExpireDays)
 	}
 }

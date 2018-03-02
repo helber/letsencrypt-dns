@@ -4,6 +4,7 @@ import (
 	"crypto/tls"
 	"crypto/x509"
 	"fmt"
+	"log"
 	"time"
 
 	"github.com/certifi/gocertifi"
@@ -76,6 +77,7 @@ func CheckHost(host string) (result HostResult, rError error) {
 	if err != nil {
 		result.Err = err
 		rError = err
+		log.Println(err)
 		return
 	}
 	defer conn.Close()

@@ -1,9 +1,10 @@
 package main
 
 import (
-	"flag"
 	"log"
 	"strings"
+
+	flag "github.com/spf13/pflag"
 
 	"github.com/bobesa/go-domain-util/domainutil"
 	"github.com/helber/letsencrypt-dns/letsencrypt"

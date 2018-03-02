@@ -3,6 +3,7 @@ PW=`pwd`
 DIR=`dirname $PW`
 echo $DIR
 docker run \
+    --rm \
     -it \
     --entrypoint=/bin/bash \
     -e LINODE_API_KEY=$LINODE_API_KEY \
