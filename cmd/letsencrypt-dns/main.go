@@ -12,7 +12,7 @@ import (
 )
 
 func main() {
-	domains := flag.String("d", "", "Domains sepered by \",\"")
+	domains := flag.StringP("domains", "d", "", "Domains sepered by \",\"")
 	flag.Parse()
 	mylog.InitLogs()
 

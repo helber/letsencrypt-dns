@@ -11,7 +11,7 @@ import (
 )
 
 func main() {
-	domains := flag.String("d", "", "Domain host and port (host:port) sepered by \",\"\nEx.: www.google.com.br:443,example.com:443,manage.openshift.com:443")
+	domains := flag.StringP("domains", "d", "", "Domain host and port (host:port) sepered by \",\"\n\tEx.: www.google.com.br:443,example.com:443,manage.openshift.com:443")
 	flag.Parse()
 	mylog.InitLogs()
 	domainlist := strings.Split(*domains, ",")

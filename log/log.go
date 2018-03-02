@@ -23,9 +23,9 @@ var logging loggingType
 func init() {
 	flag.StringVar(&logging.logDir, "logdir", "/var/log/letsencrypt-dns/", "")
 	flag.BoolVar(&logging.logStdOut, "logstdout", false, "Output log to stdout")
-	flag.BoolVar(&logging.logDebug, "logdebug", true, "Show file and line number in log")
+	flag.BoolVar(&logging.logDebug, "logdebug", false, "Show file and line number in log")
 	flag.StringVar(&logging.logFile, "logfile", "", "if logfile supplied will override default (logdir/program name)")
-	flag.BoolVar(&logging.logQuiet, "q", false, "quiet (mute log)")
+	flag.BoolVarP(&logging.logQuiet, "quiet", "q", false, "quiet (mute log)")
 }
 
 // InitLogs create log files
