@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"log"
+	"os"
 	"strings"
 
 	"github.com/helber/letsencrypt-dns/checkcert"
@@ -23,6 +24,7 @@ func main() {
 			log.Fatal("check return error")
 		}
 		log.Printf("DOMAIN=%s days=%d", res.Host, res.ExpireDays)
+		log.SetOutput(os.Stdout)
 		fmt.Println(res.ExpireDays)
 	}
 }
