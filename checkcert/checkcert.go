@@ -63,10 +63,11 @@ var sunsetSigAlgs = map[x509.SignatureAlgorithm]sigAlgSunset{
 	},
 }
 
+// CheckHost call host:port returning HostResult that contains ExpireDays
 func CheckHost(host string) (result HostResult, rError error) {
 	result = HostResult{
 		Host:       host,
-		ExpireDays: 0,
+		ExpireDays: -1,
 		Certs:      []certErrors{},
 	}
 

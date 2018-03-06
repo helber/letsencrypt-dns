@@ -20,6 +20,7 @@ func main() {
 		res, err := checkcert.CheckHost(dom)
 		if err != nil {
 			log.Printf("error %v", err)
+			log.Fatal("check return error")
 		}
 		log.Printf("DOMAIN=%s days=%d", res.Host, res.ExpireDays)
 		fmt.Println(res.ExpireDays)
