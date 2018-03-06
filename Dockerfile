@@ -26,6 +26,7 @@ RUN apk  add --no-cache --virtual .certbot-deps \
 COPY --from=0 /usr/local/bin/letsencrypt-dns /usr/local/bin/letsencrypt-dns
 COPY --from=0 /usr/local/bin/letsencrypt-validate /usr/local/bin/letsencrypt-validate
 COPY --from=0 /usr/local/bin/letsencrypt-cleanup /usr/local/bin/letsencrypt-cleanup
+COPY --from=0 /usr/local/bin/checkcert  /usr/local/bin/checkcert
 # Log directory inside container
 RUN mkdir -p /var/log/letsencrypt-dns/
 
