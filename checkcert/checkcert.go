@@ -35,6 +35,7 @@ func CheckHost(hostPort string, res chan<- HostResult) {
 		log.Printf("Either supply a valid domain name or use the -i switch to supply the ip address.\n")
 		log.Printf("Domain name lookups are not performed when the user provides the ip address.\n")
 		res <- result
+		return
 	}
 	ipAddress := ip[0] + ":" + port
 	//Connect network
@@ -42,6 +43,7 @@ func CheckHost(hostPort string, res chan<- HostResult) {
 	if err != nil {
 		log.Printf("Could not connect to %v - %v\n", ipAddress, domainName)
 		res <- result
+		return
 	}
 	defer ipConn.Close()
 	// Configure tls to look at domainName
@@ -55,6 +57,7 @@ func CheckHost(hostPort string, res chan<- HostResult) {
 		log.Printf("Client connected to: %v\n", conn.RemoteAddr())
 		log.Printf("Cert Failed for %v - %v\n", ipAddress, domainName)
 		res <- result
+		return
 	}
 	log.Printf("Client connected to: %v\n", conn.RemoteAddr())
 	log.Printf("Cert Checks OK\n")
