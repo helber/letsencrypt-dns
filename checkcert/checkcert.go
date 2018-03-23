@@ -10,16 +10,19 @@ import (
 
 // HostResult Results
 type HostResult struct {
-	Host       string
-	ExpireDays int64
-	Err        error
-	Issuer     string
-	TLSVersion string
+	Host        string
+	ExpireDays  int64
+	Err         error
+	Issuer      string
+	TLSVersion  string
+	ElapsedTime time.Duration
 }
 
 // CheckHost check cert
-func CheckHost(hostPort string) (result HostResult, rError error) {
-	result = HostResult{
+func CheckHost(hostPort string, res chan<- HostResult) {
+	log.Printf("started > %s", hostPort)
+	start := time.Now()
+	result := HostResult{
 		Host:       hostPort,
 		ExpireDays: -1,
 	}
@@ -31,16 +34,14 @@ func CheckHost(hostPort string) (result HostResult, rError error) {
 		log.Printf("Could not resolve domain name, %v.\n\n", domainName)
 		log.Printf("Either supply a valid domain name or use the -i switch to supply the ip address.\n")
 		log.Printf("Domain name lookups are not performed when the user provides the ip address.\n")
-		rError = err
-		return
+		res <- result
 	}
 	ipAddress := ip[0] + ":" + port
 	//Connect network
 	ipConn, err := net.DialTimeout("tcp", ipAddress, 5*time.Second)
 	if err != nil {
 		log.Printf("Could not connect to %v - %v\n", ipAddress, domainName)
-		rError = err
-		return
+		res <- result
 	}
 	defer ipConn.Close()
 	// Configure tls to look at domainName
@@ -53,8 +54,7 @@ func CheckHost(hostPort string) (result HostResult, rError error) {
 	if hsErr != nil {
 		log.Printf("Client connected to: %v\n", conn.RemoteAddr())
 		log.Printf("Cert Failed for %v - %v\n", ipAddress, domainName)
-		rError = err
-		return
+		res <- result
 	}
 	log.Printf("Client connected to: %v\n", conn.RemoteAddr())
 	log.Printf("Cert Checks OK\n")
@@ -99,5 +99,8 @@ func CheckHost(hostPort string) (result HostResult, rError error) {
 			break
 		}
 	}
-	return
+	t := time.Now()
+	result.ElapsedTime = t.Sub(start)
+	log.Printf("finished %v in %v", result.Host, result.ElapsedTime)
+	res <- result
 }
