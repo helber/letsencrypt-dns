@@ -1,8 +1,6 @@
 FROM golang:1.10
 WORKDIR /go/src/github.com/helber/letsencrypt-dns
 COPY . .
-RUN go get -d -v github.com/helber/letsencrypt-dns/...
-RUN go get -d -v github.com/bobesa/go-domain-util/domainutil
 RUN make && make install && make clean
 
 
