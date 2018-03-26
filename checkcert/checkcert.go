@@ -5,8 +5,11 @@ import (
 	"log"
 	"net"
 	"strings"
+	"sync"
 	"time"
 )
+
+var wg sync.WaitGroup
 
 // HostResult Results
 type HostResult struct {
@@ -27,21 +30,22 @@ func CheckHost(hostPort string, res chan<- HostResult) {
 		ExpireDays: -1,
 	}
 
+	// defer func(result HostResult, start time.Time) {
+	// }(result, start)
 	splt := strings.Split(hostPort, ":")
 	domainName, port := splt[0], splt[1]
 	ip, err := net.LookupHost(domainName)
 	if err != nil {
 		log.Printf("Could not resolve domain name, %v.\n\n", domainName)
-		log.Printf("Either supply a valid domain name or use the -i switch to supply the ip address.\n")
-		log.Printf("Domain name lookups are not performed when the user provides the ip address.\n")
 		res <- result
 		return
 	}
 	ipAddress := ip[0] + ":" + port
 	//Connect network
-	ipConn, err := net.DialTimeout("tcp", ipAddress, 5*time.Second)
+	ipConn, err := net.DialTimeout("tcp", ipAddress, time.Second*2)
 	if err != nil {
 		log.Printf("Could not connect to %v - %v\n", ipAddress, domainName)
+		result.Err = err
 		res <- result
 		return
 	}
@@ -56,11 +60,10 @@ func CheckHost(hostPort string, res chan<- HostResult) {
 	if hsErr != nil {
 		log.Printf("Client connected to: %v\n", conn.RemoteAddr())
 		log.Printf("Cert Failed for %v - %v\n", ipAddress, domainName)
+		result.Err = err
 		res <- result
 		return
 	}
-	log.Printf("Client connected to: %v\n", conn.RemoteAddr())
-	log.Printf("Cert Checks OK\n")
 	timeNow := time.Now()
 	state := conn.ConnectionState()
 	for i, v := range state.PeerCertificates {
@@ -106,4 +109,24 @@ func CheckHost(hostPort string, res chan<- HostResult) {
 	result.ElapsedTime = t.Sub(start)
 	log.Printf("finished %v in %v", result.Host, result.ElapsedTime)
 	res <- result
+}
+
+// CheckHostsParallel Return a slice of host results given some hosts
+//
+func CheckHostsParallel(hosts ...string) (res []HostResult) {
+	results := make(chan HostResult, len(hosts))
+	for _, dom := range hosts {
+		wg.Add(1)
+		go CheckHost(dom, results)
+	}
+	// fmt.Fprintf(os.Stderr, "Created [%d] checks\n", len(hosts))
+	for range hosts {
+		resT := <-results
+		log.Println(resT)
+		res = append(res, resT)
+		// fmt.Fprintf(os.Stderr, "HOST [%s] done in %s\n", resT.Host, resT.ElapsedTime)
+		wg.Done()
+	}
+	wg.Wait()
+	return
 }
