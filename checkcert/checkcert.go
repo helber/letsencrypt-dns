@@ -24,6 +24,8 @@ type HostResult struct {
 // CheckHost check cert
 func CheckHost(hostPort string, res chan<- HostResult) {
 	log.Printf("started > %s", hostPort)
+	domainName := ""
+	port := ""
 	start := time.Now()
 	result := HostResult{
 		Host:       hostPort,
@@ -33,7 +35,11 @@ func CheckHost(hostPort string, res chan<- HostResult) {
 	// defer func(result HostResult, start time.Time) {
 	// }(result, start)
 	splt := strings.Split(hostPort, ":")
-	domainName, port := splt[0], splt[1]
+	if len(splt) == 1 {
+		domainName, port = splt[0], "443"
+	} else {
+		domainName, port = splt[0], splt[1]
+	}
 	ip, err := net.LookupHost(domainName)
 	if err != nil {
 		log.Printf("Could not resolve domain name, %v.\n\n", domainName)
