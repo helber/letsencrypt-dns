@@ -43,6 +43,7 @@ func CheckHost(hostPort string, res chan<- HostResult) {
 	ip, err := net.LookupHost(domainName)
 	if err != nil {
 		log.Printf("Could not resolve domain name, %v.\n\n", domainName)
+		result.Err = err
 		res <- result
 		return
 	}

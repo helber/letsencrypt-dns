@@ -31,7 +31,9 @@ func main() {
 		OutputTable(results)
 	} else {
 		for _, result := range results {
-			fmt.Println(result.ExpireDays)
+			if result.Err == nil {
+				fmt.Println(result.ExpireDays)
+			}
 		}
 	}
 }
@@ -43,7 +45,11 @@ func OutputTable(results []checkcert.HostResult) {
 	for _, res := range results {
 		data := []string{}
 		data = append(data, fmt.Sprintf("%v", res.ElapsedTime))
-		data = append(data, fmt.Sprintf("%d", res.ExpireDays))
+		if res.Err == nil {
+			data = append(data, fmt.Sprintf("%d", res.ExpireDays))
+		} else {
+			data = append(data, "")
+		}
 		data = append(data, res.Host)
 		e := res.Err
 		if e == nil {
