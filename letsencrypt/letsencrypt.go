@@ -39,8 +39,6 @@ func CallAuto(domains []string, done chan bool) error {
 		"certonly",
 		"--agree-tos",
 		"--manual-public-ip-logging-ok",
-		"-m",
-		"sre@ahgora.com.br",
 		"-n",
 		"--preferred-challenges=dns",
 		"--manual",
@@ -49,6 +47,13 @@ func CallAuto(domains []string, done chan bool) error {
 		"--manual-cleanup-hook",
 		"letsencrypt-cleanup",
 	)
+	if os.Getenv("LE_AGREE_EMAIL") != "" {
+		cmd.Args = append(cmd.Args, "-m")
+		cmd.Args = append(cmd.Args, os.Getenv("LE_AGREE_EMAIL"))
+	} else {
+		cmd.Args = append(cmd.Args, "-m")
+		cmd.Args = append(cmd.Args, "sre@ahgora.com.br")
+	}
 	if os.Getenv("LE_SERVER") != "" {
 		cmd.Args = append(cmd.Args, "--server")
 		cmd.Args = append(cmd.Args, os.Getenv("LE_SERVER"))
