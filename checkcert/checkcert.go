@@ -56,6 +56,7 @@ func CheckHost(hostPort string, res chan<- HostResult) {
 		res <- result
 		return
 	}
+	log.Printf("Connected to %v - %v\n", ipAddress, domainName)
 	defer ipConn.Close()
 	// Configure tls to look at domainName
 	config := tls.Config{ServerName: domainName}
