@@ -13,8 +13,6 @@ import (
 	flag "github.com/spf13/pflag"
 )
 
-// "github.com/olekukonko/tablewriter"
-
 func main() {
 	domains := flag.StringP("domains", "d", "", "Domain host and port (host:port) sepered by \",\"\n\tEx.: www.google.com.br:443,example.com:443,manage.openshift.com:443")
 	displayTable := flag.BoolP("displaytable", "t", false, "Display host and elapsed query time in a table")
