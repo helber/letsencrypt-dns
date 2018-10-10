@@ -1,4 +1,4 @@
-FROM golang:1.10
+FROM golang:1.11
 WORKDIR /go/src/github.com/helber/letsencrypt-dns
 COPY . .
 RUN make && make install && make clean
@@ -15,16 +15,17 @@ RUN apk --no-cache add ca-certificates wget && \
 
 RUN apk  add --no-cache --virtual .certbot-deps \
         bash
-# RUN wget https://github.com/openshift/origin/releases/download/v3.7.1/openshift-origin-client-tools-v3.7.1-ab0f056-linux-64bit.tar.gz
-# RUN tar -zxf openshift-origin-client-tools-v3.7.1-ab0f056-linux-64bit.tar.gz && \
-#     mv openshift-origin-client-tools-v3.7.1-ab0f056-linux-64bit/oc /usr/local/bin/oc && \
-#     chmod +x /usr/local/bin/oc && \
-#     rm -Rf openshift-origin-client-tools-v3.7.1-ab0f056-linux-64bit*
+RUN wget https://github.com/openshift/origin/releases/download/v3.10.0/openshift-origin-client-tools-v3.10.0-dd10d17-linux-64bit.tar.gz
+RUN tar -zxf openshift-origin-client-tools-v3.10.0-dd10d17-linux-64bit.tar.gz && \
+    mv openshift-origin-client-tools-v3.10.0-dd10d17-linux-64bit/oc /usr/local/bin/oc && \
+    chmod +x /usr/local/bin/oc && \
+    rm -Rf openshift-origin-client-tools-v3.10.0-dd10d17-linux-64bit*
 
 COPY --from=0 /usr/local/bin/letsencrypt-dns /usr/local/bin/letsencrypt-dns
 COPY --from=0 /usr/local/bin/letsencrypt-validate /usr/local/bin/letsencrypt-validate
 COPY --from=0 /usr/local/bin/letsencrypt-cleanup /usr/local/bin/letsencrypt-cleanup
 COPY --from=0 /usr/local/bin/checkcert  /usr/local/bin/checkcert
+COPY --from=0 /usr/local/bin/oc-patch-route  /usr/local/bin/oc-patch-route
 # Log directory inside container
 RUN mkdir -p /var/log/letsencrypt-dns/
 
