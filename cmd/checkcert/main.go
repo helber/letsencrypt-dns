@@ -14,7 +14,7 @@ import (
 )
 
 func main() {
-	domains := flag.StringP("domains", "d", "", "Domain host and port (host:port) sepered by \",\"\n\tEx.: www.google.com.br:443,example.com:443,manage.openshift.com:443")
+	domains := flag.StringP("domains", "d", "", "Domain host and port (host:port:sni) sepered by \",\"\n\tEx.: www.google.com.br:443,example.com:443,manage.openshift.com:443")
 	displayTable := flag.BoolP("displaytable", "t", false, "Display host and elapsed query time in a table")
 	traceenable := flag.Bool("trace", false, "Trace to stderr")
 	flag.Parse()
@@ -39,7 +39,7 @@ func main() {
 // OutputTable set output to ascii table
 func OutputTable(results []checkcert.HostResult) {
 	table := tablewriter.NewWriter(os.Stdout)
-	table.SetHeader([]string{"Query Time", "Expire Days", "Host:port", "Error"})
+	table.SetHeader([]string{"Query Time", "Expire Days", "Host:port:sni", "Error"})
 	for _, res := range results {
 		data := []string{}
 		data = append(data, fmt.Sprintf("%v", res.ElapsedTime))

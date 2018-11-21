@@ -2,8 +2,10 @@ package checkcert
 
 import (
 	"crypto/tls"
+	"fmt"
 	"log"
 	"net"
+	"strconv"
 	"strings"
 	"sync"
 	"time"
@@ -22,44 +24,34 @@ type HostResult struct {
 }
 
 // CheckHost check cert
-func CheckHost(hostPort string, res chan<- HostResult) {
-	log.Printf("started > %s", hostPort)
-	domainName := ""
-	port := ""
+func CheckHost(host string, port int, domain string, res chan<- HostResult) {
+	full := fmt.Sprintf("%s:%d:%s", host, port, domain)
+	log.Printf("started > %s", full)
 	start := time.Now()
 	result := HostResult{
-		Host:       hostPort,
+		Host:       full,
 		ExpireDays: -1,
 	}
-
-	// defer func(result HostResult, start time.Time) {
-	// }(result, start)
-	splt := strings.Split(hostPort, ":")
-	if len(splt) == 1 {
-		domainName, port = splt[0], "443"
-	} else {
-		domainName, port = splt[0], splt[1]
-	}
-	ip, err := net.LookupHost(domainName)
+	ip, err := net.LookupHost(host)
 	if err != nil {
-		log.Printf("Could not resolve domain name, %v.\n\n", domainName)
+		log.Printf("Could not resolve domain name, %v.\n\n", host)
 		result.Err = err
 		res <- result
 		return
 	}
-	ipAddress := ip[0] + ":" + port
+	ipAddress := fmt.Sprintf("%s:%d", ip[0], port)
 	//Connect network
 	ipConn, err := net.DialTimeout("tcp", ipAddress, time.Second*2)
 	if err != nil {
-		log.Printf("Could not connect to %v - %v\n", ipAddress, domainName)
+		log.Printf("Could not connect to %v - %v\n", ipAddress, host)
 		result.Err = err
 		res <- result
 		return
 	}
-	log.Printf("Connected to %v - %v\n", ipAddress, domainName)
+	log.Printf("Connected to %v - %v\n", ipAddress, host)
 	defer ipConn.Close()
-	// Configure tls to look at domainName
-	config := tls.Config{ServerName: domainName}
+	// Configure tls to look at domain
+	config := tls.Config{ServerName: domain}
 	// Connect to tls
 	conn := tls.Client(ipConn, &config)
 	defer conn.Close()
@@ -67,7 +59,7 @@ func CheckHost(hostPort string, res chan<- HostResult) {
 	hsErr := conn.Handshake()
 	if hsErr != nil {
 		log.Printf("Client connected to: %v\n", conn.RemoteAddr())
-		log.Printf("Cert Failed for %v - %v\n", ipAddress, domainName)
+		log.Printf("Cert Failed for %v - %v\n", ipAddress, domain)
 		result.Err = err
 		res <- result
 		return
@@ -119,13 +111,33 @@ func CheckHost(hostPort string, res chan<- HostResult) {
 	res <- result
 }
 
+// ParseHostPortDomain parse host:port:domain
+func ParseHostPortDomain(info string) (host string, port int, domain string) {
+	splt := strings.Split(info, ":")
+	port = 443
+	if len(splt) > 1 {
+		portn, err := strconv.Atoi(splt[1])
+		if err == nil {
+			port = portn
+		}
+	}
+	host = splt[0]
+	if len(splt) > 2 {
+		domain = splt[2]
+	} else {
+		domain = host
+	}
+	return
+}
+
 // CheckHostsParallel Return a slice of host results given some hosts
 //
 func CheckHostsParallel(hosts ...string) (res []HostResult) {
 	results := make(chan HostResult, len(hosts))
 	for _, dom := range hosts {
 		wg.Add(1)
-		go CheckHost(dom, results)
+		host, port, domain := ParseHostPortDomain(dom)
+		go CheckHost(host, port, domain, results)
 	}
 	// fmt.Fprintf(os.Stderr, "Created [%d] checks\n", len(hosts))
 	for range hosts {
