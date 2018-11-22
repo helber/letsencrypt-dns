@@ -5,6 +5,7 @@ import (
 	"os"
 	"runtime/trace"
 	"strings"
+	"time"
 
 	"github.com/helber/letsencrypt-dns/checkcert"
 	"github.com/olekukonko/tablewriter"
@@ -39,10 +40,12 @@ func main() {
 // OutputTable set output to ascii table
 func OutputTable(results []checkcert.HostResult) {
 	table := tablewriter.NewWriter(os.Stdout)
-	table.SetHeader([]string{"Query Time", "Expire Days", "Host:port:sni", "Error"})
+	table.SetHeader([]string{"Query Time", "Expire date", "Days", "domain:port:host", "Error", "Issuer", "TLS ver"})
 	for _, res := range results {
 		data := []string{}
 		data = append(data, fmt.Sprintf("%v", res.ElapsedTime))
+		expDate := time.Now().AddDate(0, 0, int(res.ExpireDays))
+		data = append(data, fmt.Sprintf("%s", expDate.Format("2 Jan 2006")))
 		if res.Err == nil {
 			data = append(data, fmt.Sprintf("%d", res.ExpireDays))
 		} else {
@@ -55,6 +58,8 @@ func OutputTable(results []checkcert.HostResult) {
 		} else {
 			data = append(data, e.Error())
 		}
+		data = append(data, res.Issuer)
+		data = append(data, res.TLSVersion)
 		table.Append(data)
 	}
 	table.Render()

@@ -25,7 +25,7 @@ type HostResult struct {
 
 // CheckHost check cert
 func CheckHost(host string, port int, domain string, res chan<- HostResult) {
-	full := fmt.Sprintf("%s:%d:%s", host, port, domain)
+	full := fmt.Sprintf("%s:%d:%s", domain, port, host)
 	log.Printf("started > %s", full)
 	start := time.Now()
 	result := HostResult{
@@ -111,7 +111,7 @@ func CheckHost(host string, port int, domain string, res chan<- HostResult) {
 	res <- result
 }
 
-// ParseHostPortDomain parse host:port:domain
+// ParseHostPortDomain parse domain:port:host
 func ParseHostPortDomain(info string) (host string, port int, domain string) {
 	splt := strings.Split(info, ":")
 	port = 443
@@ -121,11 +121,11 @@ func ParseHostPortDomain(info string) (host string, port int, domain string) {
 			port = portn
 		}
 	}
-	host = splt[0]
+	domain = splt[0]
 	if len(splt) > 2 {
-		domain = splt[2]
+		host = splt[2]
 	} else {
-		domain = host
+		host = domain
 	}
 	return
 }
