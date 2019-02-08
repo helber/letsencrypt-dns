@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"log"
 	"strings"
 
@@ -20,12 +21,16 @@ func main() {
 	main := ""
 	for _, dom := range domainlist {
 		domain := domainutil.Domain(dom)
-		log.Printf("Domain=%s", domain)
+		if domain == "" {
+			fmt.Println("invalid domain")
+			return
+		}
+		// log.Printf("Domain=%s", domain)
 		if domain != main {
-			if main == "" {
+			if domain != "" {
 				main = domain
 			} else {
-				log.Printf("multiple registers must be a same domain %v <> %v\n", main, domain)
+				fmt.Printf("multiple registers must be a same domain %v <> %v\n", main, domain)
 				return
 			}
 		}
