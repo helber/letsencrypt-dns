@@ -40,3 +40,4 @@ cmd/letsencrypt-validate/letsencrypt-validate
 cmd/checkcert/checkcert
 certs/
 logs/
+cmd/oc-patch-route/oc-patch-route
