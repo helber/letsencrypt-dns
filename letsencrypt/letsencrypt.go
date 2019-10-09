@@ -2,6 +2,7 @@ package letsencrypt
 
 import (
 	"bufio"
+	"errors"
 	"io"
 	"log"
 	"os"
@@ -51,8 +52,7 @@ func CallAuto(domains []string, done chan bool) error {
 		cmd.Args = append(cmd.Args, "-m")
 		cmd.Args = append(cmd.Args, os.Getenv("LE_AGREE_EMAIL"))
 	} else {
-		cmd.Args = append(cmd.Args, "-m")
-		cmd.Args = append(cmd.Args, "sre@ahgora.com.br")
+		return errors.New("LE_AGREE_EMAIL enviromment variable need")
 	}
 	if os.Getenv("LE_SERVER") != "" {
 		cmd.Args = append(cmd.Args, "--server")
