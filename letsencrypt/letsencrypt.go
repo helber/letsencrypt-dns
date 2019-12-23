@@ -52,6 +52,7 @@ func CallAuto(domains []string, done chan bool) error {
 		cmd.Args = append(cmd.Args, "-m")
 		cmd.Args = append(cmd.Args, os.Getenv("LE_AGREE_EMAIL"))
 	} else {
+		done <- false
 		return errors.New("LE_AGREE_EMAIL enviromment variable need")
 	}
 	if os.Getenv("LE_SERVER") != "" {
@@ -67,10 +68,12 @@ func CallAuto(domains []string, done chan bool) error {
 	cmd.Stderr = os.Stderr
 	stdin, err := cmd.StdinPipe()
 	if nil != err {
+		done <- false
 		return err
 	}
 	stdout, err := cmd.StdoutPipe()
 	if nil != err {
+		done <- false
 		return err
 	}
 	reader := bufio.NewReader(stdout)
