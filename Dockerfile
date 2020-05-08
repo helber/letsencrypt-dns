@@ -1,11 +1,11 @@
-FROM golang:1.13
+FROM golang:1.14
 WORKDIR /go/src/github.com/helber/letsencrypt-dns
 COPY . .
 RUN make && make install && make clean
 
 FROM certbot/certbot:latest
 # https://github.com/certbot/certbot
-ENV GLIBC_VERSION=2.30-r0
+ENV GLIBC_VERSION=2.31-r0
 
 ## https://github.com/sgerrand/alpine-pkg-glibc
 RUN apk --no-cache add ca-certificates wget bash && \
@@ -16,7 +16,7 @@ RUN apk --no-cache add ca-certificates wget bash && \
 RUN apk  add --no-cache --virtual .certbot-deps \
         bash
 
-# RUN wget -q https://mirror.openshift.com/pub/openshift-v4/clients/oc/4.2/linux/oc.tar.gz &&\
+# RUN wget -q https://mirror.openshift.com/pub/openshift-v4/clients/oc/4.4/linux/oc.tar.gz &&\
 #     tar -zxf oc.tar.gz && \
 #     mv oc /usr/local/bin/oc && \
 #     chmod +x /usr/local/bin/oc && \
