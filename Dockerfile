@@ -1,11 +1,11 @@
-FROM golang:1.14
+FROM golang:1.15
 WORKDIR /go/src/github.com/helber/letsencrypt-dns
 COPY . .
 RUN make && make install && make clean
 
 FROM certbot/certbot:latest
 # https://github.com/certbot/certbot
-ENV GLIBC_VERSION=2.31-r0
+ENV GLIBC_VERSION=2.32-r0
 
 ## https://github.com/sgerrand/alpine-pkg-glibc
 RUN apk --no-cache add ca-certificates wget bash && \
