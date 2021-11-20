@@ -1,6 +1,7 @@
 package main
 
 import (
+	"context"
 	"log"
 	"os"
 	"strings"
@@ -51,7 +52,7 @@ func main() {
 		// Fetch records
 		recordName := "_acme-challenge." + certbotDomain
 		filter := cloudflare.DNSRecord{Type: "TXT", Name: recordName, Content: certbotChalenge}
-		records, err := api.DNSRecords(id, filter)
+		records, err := api.DNSRecords(context.Background(), id, filter)
 		if err != nil {
 			log.Fatal(err)
 		}
@@ -61,7 +62,7 @@ func main() {
 		}
 		for _, rec := range records {
 			log.Println("removing DNS record", rec)
-			err := api.DeleteDNSRecord(id, rec.ID)
+			err := api.DeleteDNSRecord(context.Background(), id, rec.ID)
 			if err != nil {
 				log.Fatal("can't delete record", err)
 			}

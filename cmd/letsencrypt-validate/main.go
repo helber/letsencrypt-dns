@@ -1,6 +1,7 @@
 package main
 
 import (
+	"context"
 	"fmt"
 	"log"
 	"os"
@@ -49,7 +50,7 @@ func main() {
 		if err != nil {
 			log.Fatal(err)
 		}
-		record, err := api.CreateDNSRecord(id, cloudflare.DNSRecord{Type: "TXT", Name: record, Content: certbotChalenge, TTL: 300})
+		record, err := api.CreateDNSRecord(context.Background(), id, cloudflare.DNSRecord{Type: "TXT", Name: record, Content: certbotChalenge, TTL: 300})
 		if err != nil {
 			log.Fatal(err)
 		}
