@@ -52,7 +52,16 @@ func main() {
 		// Fetch records
 		recordName := "_acme-challenge." + certbotDomain
 		filter := cloudflare.DNSRecord{Type: "TXT", Name: recordName, Content: certbotChalenge}
-		records, err := api.DNSRecords(context.Background(), id, filter)
+		// records, err := api.GetDNSRecord(context.Background(), &rcontainer, id)
+		records, _, err := api.ListDNSRecords(
+			context.Background(),
+			cloudflare.ZoneIdentifier(id),
+			cloudflare.ListDNSRecordsParams{
+				Type:    "TXT",
+				Name:    recordName,
+				Content: certbotChalenge,
+			},
+		)
 		if err != nil {
 			log.Fatal(err)
 		}
@@ -62,7 +71,7 @@ func main() {
 		}
 		for _, rec := range records {
 			log.Println("removing DNS record", rec)
-			err := api.DeleteDNSRecord(context.Background(), id, rec.ID)
+			err := api.DeleteDNSRecord(context.Background(), cloudflare.ZoneIdentifier(certbotDomain), id)
 			if err != nil {
 				log.Fatal("can't delete record", err)
 			}

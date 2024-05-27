@@ -50,11 +50,22 @@ func main() {
 		if err != nil {
 			log.Fatal(err)
 		}
-		record, err := api.CreateDNSRecord(context.Background(), id, cloudflare.DNSRecord{Type: "TXT", Name: record, Content: certbotChalenge, TTL: 300})
+		new_record, err := api.CreateDNSRecord(
+			context.Background(),
+			cloudflare.ZoneIdentifier(id),
+			cloudflare.CreateDNSRecordParams{
+				Type:    "TXT",
+				Name:    record,
+				Content: certbotChalenge,
+				TTL:     300,
+				ZoneID:  id,
+				// ZoneName: mainDomain,
+			},
+		)
 		if err != nil {
 			log.Fatal(err)
 		}
-		log.Println("New record", record)
+		log.Println("New record", new_record)
 	}
 	notify := make(chan bool)
 	defer close(notify)
