@@ -58,8 +58,6 @@ func main() {
 				Name:    record,
 				Content: certbotChalenge,
 				TTL:     300,
-				ZoneID:  id,
-				// ZoneName: mainDomain,
 			},
 		)
 		if err != nil {

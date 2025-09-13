@@ -1,4 +1,4 @@
-FROM golang:1.22
+FROM golang:1.25.1
 WORKDIR /go/src/github.com/helber/letsencrypt-dns
 COPY . .
 RUN go get ./...
@@ -21,8 +21,6 @@ RUN apk  add --no-cache --virtual .certbot-deps \
 COPY --from=0 /usr/local/bin/letsencrypt-dns /usr/local/bin/letsencrypt-dns
 COPY --from=0 /usr/local/bin/letsencrypt-validate /usr/local/bin/letsencrypt-validate
 COPY --from=0 /usr/local/bin/letsencrypt-cleanup /usr/local/bin/letsencrypt-cleanup
-COPY --from=0 /usr/local/bin/checkcert  /usr/local/bin/checkcert
-COPY --from=0 /usr/local/bin/oc-patch-route  /usr/local/bin/oc-patch-route
 # Log directory inside container
 RUN mkdir -p /var/log/letsencrypt-dns/
 

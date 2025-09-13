@@ -1,5 +1,5 @@
 
-APPS=letsencrypt-dns letsencrypt-validate letsencrypt-cleanup checkcert oc-patch-route
+APPS=letsencrypt-dns letsencrypt-validate letsencrypt-cleanup
 
 app:
 	$(foreach exe,$(APPS),\

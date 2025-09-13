@@ -39,7 +39,6 @@ func CallAuto(domains []string, done chan bool) error {
 		"certbot",
 		"certonly",
 		"--agree-tos",
-		"--manual-public-ip-logging-ok",
 		"-n",
 		"--preferred-challenges=dns",
 		"--manual",
